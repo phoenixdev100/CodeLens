@@ -1,0 +1,69 @@
+# ============================================================================
+# Frontend .gitignore — Next.js + TypeScript specific
+# ============================================================================
+
+# --- Dependencies ---
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# --- Secrets / Environment (NEVER commit) ---
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+
+# --- Testing ---
+/coverage
+*.lcov
+
+# --- Next.js ---
+/.next/
+/out/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Production build ---
+/build
+
+# --- Vercel / Deployment ---
+.vercel
+.netlify
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Debug logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Caches ---
+.eslintcache
+.stylelintcache
+.cache/
+.parcel-cache/
+
+# --- Misc temp files ---
+*.bak
+*.tmp
+*.orig
+*.rej
