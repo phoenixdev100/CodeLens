@@ -1,0 +1,106 @@
+# ============================================================================
+# CodeLens — Root .gitignore
+# Covers backend + frontend + common dev/OS/editor artifacts
+# ============================================================================
+
+# --- Secrets / Environment (NEVER commit these) ---
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+credentials.json
+service-account.json
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.python-version
+*.egg-info/
+.eggs/
+dist/
+build/
+sdist/
+wheels/
+
+# --- Node.js / Frontend ---
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# --- Next.js ---
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Build output ---
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# --- Test / Coverage ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+.nyc_output/
+*.lcov
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.fleet/
+*.code-workspace
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# --- Caches ---
+.cache/
+.eslintcache
+.stylelintcache
+.parcel-cache/
+.turbo/
+
+# --- Vercel / Deployment ---
+.vercel
+.netlify
+
+# --- Misc temp files ---
+*.bak
+*.tmp
+*.temp
+*.orig
+*.rej
