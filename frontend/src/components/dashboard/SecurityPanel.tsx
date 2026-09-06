@@ -16,13 +16,13 @@ const CHECK_TYPE_LABELS: Record<string, string> = {
 };
 
 const CHECK_TYPE_DESCRIPTIONS: Record<string, string> = {
-  "secret-scan": "Detects leaked credentials: AWS keys, GitHub tokens, Google API keys, JWT, private keys, connection strings, Slack/Stripe tokens",
-  "injection": "Detects SQL string concatenation, raw queries, NoSQL injection, ORM unsafe usage, template injection",
-  "xss-csrf": "Detects innerHTML, dangerouslySetInnerHTML, document.write, eval, unsafe redirects, missing CSRF",
-  "path-traversal-ssrf": "Detects path traversal, file access with user input, SSRF, open redirects",
-  "command-injection": "Detects exec, execSync, spawn, child_process, shell injection via template literals",
-  "sensitive-file": "Flags changes to auth, session, token, crypto, security, oauth, jwt files",
-  "dependency": "Analyzes package.json changes for unpinned versions, git deps, postinstall scripts",
+  "secret-scan": "Checks if any passwords, API keys, or tokens were accidentally left in the code",
+  "injection": "Checks if user input could be used to run unwanted database queries (SQL/NoSQL injection)",
+  "xss-csrf": "Checks for cross-site scripting (XSS) and cross-site request forgery (CSRF) vulnerabilities",
+  "path-traversal-ssrf": "Checks if user input could be used to access files or servers they shouldn't",
+  "command-injection": "Checks if user input could be used to run system commands on the server",
+  "sensitive-file": "Flags changes to files that handle authentication, sessions, tokens, or security",
+  "dependency": "Checks if new or changed dependencies (packages) look suspicious or unsafe",
 };
 
 export function SecurityPanel({
@@ -36,31 +36,30 @@ export function SecurityPanel({
   const checks = security.checks ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-slate-900">Security Analysis</h1>
+        <h1 className="text-xl font-bold tracking-tight text-slate-900">Security Checks</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Comprehensive deterministic security scanning across {security.total_checks} categories.
-          {security.failed_checks > 0 && (
-            <span className="font-medium text-red-600"> {security.failed_checks} check(s) failed.</span>
-          )}
-          {security.failed_checks === 0 && (
-            <span className="font-medium text-green-600"> All checks passed.</span>
+          CodeLens runs {security.total_checks} automated security checks on this PR.
+          {security.failed_checks > 0 ? (
+            <span className="font-medium text-red-600"> {security.failed_checks} check(s) found issues.</span>
+          ) : (
+            <span className="font-medium text-green-600"> All checks passed — no security issues detected.</span>
           )}
         </p>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <SummaryCard label="Total Checks" value={security.total_checks} color="text-slate-900" />
-        <SummaryCard label="Passed" value={security.passed_checks} color="text-green-600" />
-        <SummaryCard label="Failed" value={security.failed_checks} color="text-red-600" />
-        <SummaryCard label="Findings" value={security.findings.length} color="text-amber-600" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7">
+        <SummaryCard label="Total Checks" value={security.total_checks} color="text-slate-900" hint="Number of security categories scanned" />
+        <SummaryCard label="Passed" value={security.passed_checks} color="text-green-600" hint="Checks that found no issues" />
+        <SummaryCard label="Failed" value={security.failed_checks} color="text-red-600" hint="Checks that found potential security issues" />
+        <SummaryCard label="Issues Found" value={security.findings.length} color="text-amber-600" hint="Total security issues detected" />
       </div>
 
       {/* Check results */}
-      <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-2">
         {checks.map((check) => (
           <CheckCard key={check.check_type} check={check} onSelectFinding={onSelectFinding} />
         ))}
@@ -69,7 +68,8 @@ export function SecurityPanel({
       {/* All security findings */}
       {security.findings.length > 0 && (
         <Card padding="lg">
-          <h3 className="mb-3 text-sm font-semibold text-slate-900">All Security Findings</h3>
+          <h3 className="mb-1 text-sm font-semibold text-slate-900">All Security Issues</h3>
+          <p className="mb-3 text-xs text-slate-400">Sorted by severity — most critical first. Click any issue for details.</p>
           <div className="space-y-2">
             {security.findings
               .slice()
@@ -95,8 +95,8 @@ export function SecurityPanel({
       )}
 
       <p className="text-xs text-slate-400">
-        CodeLens uses deterministic pattern matching, not an enterprise SAST scanner. False positives are possible.
-        Always verify findings manually.
+        CodeLens uses automated pattern matching — it may miss some issues or flag things that aren&apos;t actually problems.
+        Always verify important findings manually.
       </p>
     </div>
   );
@@ -113,8 +113,8 @@ function CheckCard({
   const description = CHECK_TYPE_DESCRIPTIONS[check.check_type] ?? "";
   const statusConfig = {
     pass: { bg: "bg-green-50", border: "border-green-200", text: "text-green-700", icon: "✓", label: "PASSED" },
-    warn: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", icon: "⚠", label: "WARNING" },
-    fail: { bg: "bg-red-50", border: "border-red-200", text: "text-red-700", icon: "✗", label: "FAILED" },
+    warn: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", icon: "⚠", label: "REVIEW NEEDED" },
+    fail: { bg: "bg-red-50", border: "border-red-200", text: "text-red-700", icon: "✗", label: "ISSUES FOUND" },
   };
   const cfg = statusConfig[check.status as keyof typeof statusConfig] ?? statusConfig.pass;
 
@@ -182,10 +182,10 @@ function FindingRow({ finding, onClick }: { finding: Finding; onClick: () => voi
   );
 }
 
-function SummaryCard({ label, value, color }: { label: string; value: number; color: string }) {
+function SummaryCard({ label, value, color, hint }: { label: string; value: number; color: string; hint?: string }) {
   return (
-    <Card padding="sm">
-      <p className="text-xs text-slate-400">{label}</p>
+    <Card padding="sm" className={hint ? "cursor-help" : ""}>
+      <p className="text-xs text-slate-400" title={hint}>{label}</p>
       <p className={`mt-1 text-2xl font-bold ${color}`}>{value}</p>
     </Card>
   );

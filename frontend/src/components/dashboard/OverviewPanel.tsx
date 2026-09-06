@@ -29,7 +29,7 @@ export function OverviewPanel({
   const topPriority = priority.items.slice(0, 5);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* PR title + risk hero */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="md:col-span-2">
@@ -51,13 +51,13 @@ export function OverviewPanel({
               {change.size_class.toUpperCase()} PR
             </span>
             {change.scope_drift.has_drift && (
-              <span className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-medium text-orange-700">
-                Scope Drift
+              <span className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-medium text-orange-700" title="This PR changes more areas than its title suggests">
+                Does More Than Title Says
               </span>
             )}
             {result.critical.areas.length > 0 && (
-              <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-medium text-red-700">
-                {result.critical.areas.length} Critical Area{result.critical.areas.length > 1 ? "s" : ""}
+              <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-medium text-red-700" title="Changes touch sensitive areas like auth, payment, or security">
+                {result.critical.areas.length} Sensitive Area{result.critical.areas.length > 1 ? "s" : ""}
               </span>
             )}
           </div>
@@ -66,17 +66,19 @@ export function OverviewPanel({
         <Card className="flex flex-col items-center justify-center">
           <RiskMeter score={risk.total_score} level={risk.level} size="md" />
           <p className="mt-3 text-center text-[10px] text-slate-400">
-            MVP heuristic — not scientifically validated
+            Estimated risk — use as a guide, not a final verdict
           </p>
         </Card>
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatCard label="Files Changed" value={change.files_changed} />
-        <StatCard label="Additions" value={`+${formatNum(change.lines_added)}`} color="text-green-600" />
-        <StatCard label="Deletions" value={`-${formatNum(change.lines_removed)}`} color="text-red-600" />
-        <StatCard label="PR Size" value={change.size_class.toUpperCase()} />
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
+        <StatCard label="Files Changed" value={change.files_changed} hint="Number of files modified in this PR" />
+        <StatCard label="Lines Added" value={`+${formatNum(change.lines_added)}`} color="text-green-600" hint="New lines of code added" />
+        <StatCard label="Lines Removed" value={`-${formatNum(change.lines_removed)}`} color="text-red-600" hint="Lines of code deleted" />
+        <StatCard label="PR Size" value={change.size_class.toUpperCase()} hint="Small / Medium / Large based on lines changed" />
+        <StatCard label="Issues Found" value={result.all_findings.length} color="text-amber-600" hint="Total issues detected by CodeLens" />
+        <StatCard label="Sensitive Areas" value={result.critical.areas.length} color="text-red-600" hint="Areas like auth, payment, or security that were changed" />
       </div>
 
       {/* Project context */}
@@ -147,9 +149,10 @@ export function OverviewPanel({
       )}
 
       {/* Affected areas + risk contributors */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <Card>
-          <CardHeader title="Affected Areas" subtitle={`${change.functional_areas.length} functional area(s) detected`} />
+          <CardHeader title="What Areas Are Affected?" subtitle={`${change.functional_areas.length} area(s) touched by this PR`} />
+          <p className="mb-3 text-xs text-slate-400">Click any area to see connected files in the Impact Map</p>
           <div className="flex flex-wrap gap-2">
             {change.functional_areas.map((area) => {
               const isCritical = result.critical.areas.some((ca) => ca.name === area.name);
@@ -162,6 +165,7 @@ export function OverviewPanel({
                       ? "border-red-200 bg-red-50 text-red-700"
                       : "border-slate-200 bg-slate-50 text-slate-700"
                   }`}
+                  title={isCritical ? "This is a sensitive area (e.g. auth, payment, security)" : ""}
                 >
                   <SeverityDot severity={isCritical ? "critical" : null} />
                   <span className="capitalize">{area.name}</span>
@@ -172,14 +176,14 @@ export function OverviewPanel({
           </div>
           {change.scope_drift.has_drift && (
             <div className="mt-3 rounded-md border border-orange-200 bg-orange-50 p-2.5 text-xs text-orange-700">
-              <strong>Scope drift:</strong> PR title suggests {change.scope_drift.stated_areas.join(", ") || "specific areas"},
-              but changes touch {change.scope_drift.actual_areas.join(", ")}.
+              <strong>Heads up:</strong> The PR title talks about {change.scope_drift.stated_areas.join(", ") || "specific areas"},
+              but the code also changes {change.scope_drift.actual_areas.join(", ")}. This may be unintentional.
             </div>
           )}
         </Card>
 
         <Card>
-          <CardHeader title="Top Risk Contributors" subtitle="Factors driving the risk score" />
+          <CardHeader title="What Makes This Risky?" subtitle="Main reasons driving the risk score" />
           <ul className="space-y-2">
             {risk.top_contributors.slice(0, 4).map((contrib, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
@@ -189,13 +193,40 @@ export function OverviewPanel({
             ))}
           </ul>
         </Card>
+
+        {/* Quick takeaway */}
+        <Card className="border-indigo-100 bg-indigo-50/30">
+          <CardHeader title="Quick Summary" subtitle="Plain-English takeaway" />
+          <div className="space-y-2 text-sm text-slate-700">
+            <p>
+              This PR changes <strong>{change.files_changed} file{change.files_changed !== 1 ? "s" : ""}</strong> with{" "}
+              <strong className="text-green-600">+{formatNum(change.lines_added)}</strong> additions and{" "}
+              <strong className="text-red-600">-{formatNum(change.lines_removed)}</strong> deletions.
+            </p>
+            <p>
+              Risk level: <strong>{risk.level}</strong> ({risk.total_score}/100).
+              {" "}
+              {risk.level === "HIGH" || risk.level === "CRITICAL"
+                ? "Review carefully before merging."
+                : risk.level === "MEDIUM"
+                ? "Worth a careful look, but not alarming."
+                : "Looks low risk — but always verify."}
+            </p>
+            {result.all_findings.length > 0 && (
+              <p>
+                CodeLens found <strong>{result.all_findings.length} issue{result.all_findings.length !== 1 ? "s" : ""}</strong>.
+                {" "}Check the <button onClick={() => onTabChange("priority")} className="font-medium text-indigo-600 hover:underline">Review Priority</button> tab to see where to start.
+              </p>
+            )}
+          </div>
+        </Card>
       </div>
 
       {/* Risk breakdown preview */}
       <Card>
         <CardHeader
-          title="Risk Analysis"
-          subtitle="Six-dimension risk breakdown"
+          title="Risk Breakdown"
+          subtitle="Risk is measured across 6 areas — click for full details"
           action={
             <button
               onClick={() => onTabChange("risk")}
@@ -205,7 +236,7 @@ export function OverviewPanel({
             </button>
           }
         />
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {risk.dimension_scores.map((dim) => (
             <RiskBar
               key={dim.dimension}
@@ -219,11 +250,11 @@ export function OverviewPanel({
       </Card>
 
       {/* Review priority + top findings */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <Card>
           <CardHeader
-            title="Review First"
-            subtitle="Where to focus your review"
+            title="Review These Files First"
+            subtitle="Files ranked by importance — start at #1"
             action={
               <button
                 onClick={() => onTabChange("priority")}
@@ -253,8 +284,8 @@ export function OverviewPanel({
 
         <Card>
           <CardHeader
-            title="Top Findings"
-            subtitle={`${result.all_findings.length} total finding(s)`}
+            title="Top Issues Found"
+            subtitle={`${result.all_findings.length} total issue(s) — click any to see details`}
             action={
               <button
                 onClick={() => onTabChange("findings")}
@@ -290,20 +321,22 @@ export function OverviewPanel({
       {/* AI insights */}
       <Card>
         <CardHeader
-          title="AI Interpretation"
-          subtitle={`Provider: ${ai_insights.provider}`}
+          title="AI Summary"
+          subtitle="What the AI thinks this PR is doing and why it's risky"
         />
         <div className="space-y-3 text-sm text-slate-600">
           <div>
-            <span className="font-semibold text-slate-700">PR Intent: </span>
+            <span className="font-semibold text-slate-700">What this PR does: </span>
             {ai_insights.pr_intent}
           </div>
           <div>
-            <span className="font-semibold text-slate-700">Risk Reasoning: </span>
+            <span className="font-semibold text-slate-700">Why it&apos;s risky: </span>
             {ai_insights.risk_reasoning}
           </div>
         </div>
-        <p className="mt-3 text-[10px] text-slate-400">{ai_insights.disclaimer}</p>
+        <p className="mt-3 text-[10px] text-slate-400">
+          AI-generated summary — always verify before acting on it. {ai_insights.disclaimer}
+        </p>
       </Card>
 
       {/* Impact map preview */}
@@ -313,8 +346,8 @@ export function OverviewPanel({
             <h3 className="text-sm font-semibold text-slate-900">Impact Map Preview</h3>
             <p className="mt-0.5 text-xs text-slate-500">
               {impactMap
-                ? `${impactMap.stats.total_nodes ?? 0} nodes · ${impactMap.stats.total_edges ?? 0} edges`
-                : "Click to load impact map"}
+                ? `${impactMap.stats.total_nodes ?? 0} files and areas · ${impactMap.stats.total_edges ?? 0} connections`
+                : "See which files are connected to each other"}
             </p>
           </div>
           <button
@@ -352,10 +385,10 @@ export function OverviewPanel({
   );
 }
 
-function StatCard({ label, value, color = "text-slate-900" }: { label: string; value: string | number; color?: string }) {
+function StatCard({ label, value, color = "text-slate-900", hint }: { label: string; value: string | number; color?: string; hint?: string }) {
   return (
-    <Card padding="sm">
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
+    <Card padding="sm" className={hint ? "cursor-help" : ""}>
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-400" title={hint}>{label}</p>
       <p className={`mt-1 text-2xl font-bold ${color}`}>{value}</p>
     </Card>
   );
@@ -372,11 +405,11 @@ function formatNum(n: number): string {
 function formatDimension(d: string): string {
   const labels: Record<string, string> = {
     change: "Change Size",
-    scope: "Scope / Drift",
-    critical: "Critical Functionality",
+    scope: "Scope / Focus",
+    critical: "Sensitive Areas",
     security: "Security",
     quality: "Code Quality",
-    tests: "Tests",
+    tests: "Test Coverage",
   };
   return labels[d] ?? d;
 }

@@ -37,7 +37,7 @@ export function FindingDetail({
       <div className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-          <h2 className="text-sm font-semibold text-slate-900">Finding Detail</h2>
+          <h2 className="text-sm font-semibold text-slate-900">Issue Details</h2>
           <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
@@ -54,7 +54,9 @@ export function FindingDetail({
           <div className="mb-4 flex items-center gap-2">
             <SeverityBadge severity={finding.severity} />
             <CategoryBadge category={finding.category} />
-            <span className="text-xs text-slate-400">confidence: {finding.confidence}</span>
+            <span className="text-xs text-slate-400" title="How confident CodeLens is about this finding">
+              confidence: {finding.confidence}
+            </span>
           </div>
 
           {/* Title */}
@@ -84,7 +86,7 @@ export function FindingDetail({
           </Section>
 
           {/* Evidence */}
-          <Section label="Evidence">
+          <Section label="Evidence (code snippets that triggered this)">
             <ul className="space-y-1.5">
               {finding.evidence.map((ev, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
@@ -103,7 +105,7 @@ export function FindingDetail({
               <p className="text-sm leading-relaxed text-slate-600">{aiExplanation.explanation}</p>
               {aiExplanation.is_inference && (
                 <p className="mt-2 text-xs italic text-amber-600">
-                  This explanation contains AI inference and should be verified.
+                  This is an AI-generated explanation — please verify it before acting.
                 </p>
               )}
             </Section>
@@ -111,7 +113,7 @@ export function FindingDetail({
 
           {/* Connected files */}
           {connectedFiles.length > 0 && (
-            <Section label="Connected Files">
+            <Section label="Related Files (in the same area)">
               <ul className="space-y-1">
                 {Array.from(new Set(connectedFiles)).map((file) => (
                   <li key={file} className="flex items-center gap-2 font-mono text-xs text-slate-600">
@@ -134,7 +136,7 @@ export function FindingDetail({
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h8m-8 5h8m-8 5h8M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5z" />
               </svg>
-              View Diff
+              View Code Changes
             </button>
           )}
         </div>

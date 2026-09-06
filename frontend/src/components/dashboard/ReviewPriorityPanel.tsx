@@ -17,17 +17,17 @@ export function ReviewPriorityPanel({
   const { priority } = analysis;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h1 className="text-xl font-bold tracking-tight text-slate-900">Review Priority</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Where to focus your review first. Ranked by priority score.
+          Where should you focus your review first? Files are ranked by importance — start at #1 and work your way down.
         </p>
       </div>
 
       {priority.top_concerns.length > 0 && (
         <Card className="border-indigo-100 bg-indigo-50/50">
-          <CardHeader title="Top Concerns" subtitle="Summary of the most important review areas" />
+          <CardHeader title="Key Things to Watch For" subtitle="The most important areas to pay attention to" />
           <ul className="space-y-1.5">
             {priority.top_concerns.map((concern, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
@@ -41,20 +41,22 @@ export function ReviewPriorityPanel({
 
       <Card padding="none">
         <div className="border-b border-slate-200 px-4 py-3">
-          <h3 className="text-sm font-semibold text-slate-900">Priority Ranking</h3>
-          <p className="mt-0.5 text-xs text-slate-500">{priority.items.length} file(s) ranked</p>
+          <h3 className="text-sm font-semibold text-slate-900">Files to Review (Ranked)</h3>
+          <p className="mt-0.5 text-xs text-slate-500">
+            {priority.items.length} file(s) ranked by importance · Click a file to see its diff
+          </p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <th className="px-4 py-2.5 text-left">#</th>
+                <th className="px-4 py-2.5 text-left">Rank</th>
                 <th className="px-4 py-2.5 text-left">File</th>
                 <th className="px-4 py-2.5 text-left">Severity</th>
                 <th className="px-4 py-2.5 text-right">Score</th>
-                <th className="px-4 py-2.5 text-left">Reason</th>
-                <th className="px-4 py-2.5 text-right">Findings</th>
-                <th className="px-4 py-2.5 text-right">Actions</th>
+                <th className="px-4 py-2.5 text-left">Why</th>
+                <th className="px-4 py-2.5 text-right">Issues</th>
+                <th className="px-4 py-2.5 text-right">View</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -92,13 +94,13 @@ export function ReviewPriorityPanel({
                     <span className="font-mono text-xs text-slate-500">{item.supporting_finding_ids.length}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-2 opacity-0 transition group-hover:opacity-100">
+                    <div className="flex justify-end gap-2">
                       {item.supporting_finding_ids.length > 0 && (
                         <button
                           onClick={() => onSelectFinding(item.supporting_finding_ids[0])}
                           className="rounded border border-slate-200 px-2 py-0.5 text-xs text-slate-600 transition hover:bg-slate-100"
                         >
-                          Finding
+                          Issue
                         </button>
                       )}
                       <button
