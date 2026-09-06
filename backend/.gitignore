@@ -1,0 +1,67 @@
+# ============================================================================
+# Backend .gitignore — Python + FastAPI specific
+# ============================================================================
+
+# --- Secrets / Environment (NEVER commit) ---
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+credentials.json
+service-account.json
+
+# --- Python bytecode / cache ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+.python-version
+
+# --- Test / Coverage ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+.nyc_output/
+*.lcov
+
+# --- Build / packaging ---
+dist/
+build/
+sdist/
+wheels/
+*.egg
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs ---
+*.log
+
+# --- Misc temp files ---
+*.bak
+*.tmp
+*.orig
+*.rej
