@@ -31,19 +31,20 @@ export function FindingsPanel({
   }, [all_findings, severityFilter, categoryFilter, fileFilter]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-slate-900">Findings</h1>
+        <h1 className="text-xl font-bold tracking-tight text-slate-900">All Issues Found</h1>
         <p className="mt-1 text-sm text-slate-500">
-          {all_findings.length} finding(s) from deterministic analysis. Click a finding for details.
+          CodeLens found {all_findings.length} issue(s) in this PR. Click any issue to see what changed, why it matters, and the evidence.
         </p>
       </div>
 
       {/* Filters */}
       <Card>
+        <p className="mb-3 text-xs font-medium text-slate-500">Filter issues to find what you need:</p>
         <div className="flex flex-wrap gap-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Severity</label>
+            <label className="mb-1 block text-xs font-medium text-slate-500">Severity (how bad)</label>
             <div className="flex flex-wrap gap-1">
               {SEVERITIES.map((sev) => (
                 <button
@@ -61,7 +62,7 @@ export function FindingsPanel({
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-500">Category</label>
+            <label className="mb-1 block text-xs font-medium text-slate-500">Category (type)</label>
             <div className="flex flex-wrap gap-1">
               {CATEGORIES.map((cat) => (
                 <button
@@ -79,12 +80,12 @@ export function FindingsPanel({
             </div>
           </div>
           <div className="flex-1">
-            <label className="mb-1 block text-xs font-medium text-slate-500">File</label>
+            <label className="mb-1 block text-xs font-medium text-slate-500">Search by file name</label>
             <input
               type="text"
               value={fileFilter}
               onChange={(e) => setFileFilter(e.target.value)}
-              placeholder="Filter by file path…"
+              placeholder="e.g. auth, payment, config…"
               className="w-full rounded border border-slate-200 px-3 py-1.5 text-sm text-slate-700 outline-none transition focus:border-indigo-400 focus:ring-1 focus:ring-indigo-200"
             />
           </div>
@@ -95,12 +96,13 @@ export function FindingsPanel({
       <Card padding="none">
         <div className="border-b border-slate-200 px-4 py-3">
           <h3 className="text-sm font-semibold text-slate-900">
-            {filtered.length} finding{filtered.length !== 1 ? "s" : ""}
+            {filtered.length} issue{filtered.length !== 1 ? "s" : ""} shown
           </h3>
+          <p className="mt-0.5 text-xs text-slate-400">Sorted by severity — most critical first</p>
         </div>
         {filtered.length === 0 ? (
           <div className="px-4 py-12 text-center">
-            <p className="text-sm text-slate-500">No findings match the current filters.</p>
+            <p className="text-sm text-slate-500">No issues match your filters. Try changing the filters above.</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100">

@@ -44,9 +44,12 @@ export function DiffPanel({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-slate-900">Diff</h1>
+        <h1 className="text-xl font-bold tracking-tight text-slate-900">Code Changes (Diff)</h1>
         <p className="mt-1 text-sm text-slate-500">
-          {files.length} changed file(s). Click a file to view its diff.
+          The actual code changes in this PR. {files.length} file(s) changed — click any file to see what was added or removed.
+          <span className="mt-0.5 block text-xs text-slate-400">
+            Green lines (<span className="font-mono text-green-600">+</span>) are additions · Red lines (<span className="font-mono text-red-600">-</span>) are deletions
+          </span>
         </p>
       </div>
 
